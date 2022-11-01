@@ -76,6 +76,17 @@ for model in fileList:
     zip_file = zipfile.ZipFile(file_loc_export+os.path.splitext(model)[0]+'.zip', "w")
     #zip_file.write(file_loc_export + 'scene.png', basename(file_loc_export + 'scene.png'), compress_type=zipfile.ZIP_DEFLATED)
 
+    #Rendering thumbnail
+    bpy.ops.view3d.camera_to_view_selected()
+    bpy.ops.render.render(write_still = 1)   
+
+    #Creating gray-background thumnnail.png file
+    im = Image.open(scene.render.filepath)
+    nim = Image.new(mode = "RGBA", size = im.size, color = (240, 240, 240))
+    nim.paste(im, (0, 0), im)
+    nim.save(scene.render.filepath)
+    zip_file.write(scene.render.filepath, basename(scene.render.filepath), compress_type=zipfile.ZIP_DEFLATED)
+
     #Exporting .glb file
     bpy.ops.export_scene.gltf(filepath=file_loc_export+'scene.glb', export_materials='EXPORT', export_format='GLB')
     zip_file.write(file_loc_export + 'scene.glb', basename(file_loc_export + 'scene.glb'), compress_type=zipfile.ZIP_DEFLATED)
