@@ -30,6 +30,18 @@ for model in fileList:
     image_name = bpy.context.active_object.name + '_tex'
     img = bpy.data.images.new(image_name,2048,2048)
 
+    #Resizing
+    dimX = bpy.context.object.dimensions.x
+    dimY = bpy.context.object.dimensions.y
+    dimZ = bpy.context.object.dimensions.z
+
+    dimMax = dimX if dimX > dimY else dimY
+    dimMax = dimZ if dimZ > dimMax else dimMax
+
+    bpy.context.object.scale[0] = 1 / dimMax
+    bpy.context.object.scale[1] = 1 / dimMax
+    bpy.context.object.scale[2] = 1 / dimMax
+
     #Allocating material
     mat = bpy.data.materials.get("Material")
     
