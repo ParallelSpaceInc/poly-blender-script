@@ -22,6 +22,13 @@ scene.render.filepath = file_loc_export + 'thumbnail.png'
 #Need when using bat
 bpy.ops.object.delete()
 
+#Add Light
+light_data = bpy.data.lights.new(name="Light2", type='POINT')
+light_data.energy = 1200
+light_object = bpy.data.objects.new(name="Light2", object_data=light_data)
+bpy.context.collection.objects.link(light_object)
+light_object.location = (-4, -1, 6)
+
 for model in fileList:
     print(model)
     imported_object = bpy.ops.import_mesh.ply(filepath=file_loc_import+model)
