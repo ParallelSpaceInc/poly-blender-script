@@ -3,213 +3,180 @@
 
 Blender는 3D 모델을 가공할 수 있는 오픈소스 그래픽 소프트웨어이다. Blender에는  파이썬 코드를 통해 기능을 제어할 수 있는 bpy 모듈을 지원하는데, 이를 잘 활용하면  반복적인 작업을 사용자가 편리하게끔 자동화할 수 있다.
 
-이 README 파일은 Blender와 파이썬 스크립트를 통해 .ply 확장자의 3D 모델들을 텍스쳐가 포함된 .glb 확장자 형식으로 변환하는 방법을 설명한다.
+이 README 파일은 Blender와 파이썬 스크립트를 통해 모델을 자동으로 가공하는 스크립트들을 설명한다. 아래의 스크립트들은 Lab1의 예시처럼 콘솔 창을 통해 사용할 수도 있고, Blender 프로그램의 Script 탭에서 직접 입력하여 사용할 수도 있다. Blender와 Python 설치는 Lab1의 **1.프로그램 설치** 를 참고한다. 
 
 ****
 
-## 1. 프로그램 설치
+## 1. RemeshScript.py
 
-먼저 Blender와 Python이 설치되어있어야 한다. 각각 [https://www.blender.org/download/](https://www.blender.org/download/) 와 [https://www.python.org/downloads/](https://www.python.org/downloads/) 에서 최신 버전을 다운로드 받을 수 있다. 리눅스 환경이라면 아래의 명령어를 터미널 창에 입력하는 것으로도 파이썬을 설치할 수 있다.
-
-```
-sudo apt-get install python3
-```
-
-그 다음 스크립트 실행에 필요한 파이썬 모듈을 설치하기 위해 터미널을 연다. 윈도우 환경에서 터미널은 검색 창이나 폴더의 주소창에서 cmd를 입력하면 열 수 있다. 
-
-터미널 창에서 해당 명령어를 입력해 zipfile 모듈을 설치한다. zipfile 모듈은 파이썬에서 ZIP 압축 파일을 다루기 위해 필요한 라이브러리이며, 자동화 스크립트로 변환한 파일들을 압축시킬 때에 사용된다.
-
-```
-pip install zipfile
-```
-
-설치가 성공적으로 완료되었으면 이제 자동화 스크립트를 실행할 수 있다.
-
-
-****
-
-## 2. 스크립트 실행
-
-자동화 스크립트를 사용하기 위해선 한 폴더 안에 다음 항목들을 모두 집어넣어야 한다.
-
-1. 변환할 .ply 모델 파일들
-2. 자동화 스크립트 파일 `BlednerCLI.py`
-3. 배치 파일 `script.bat` (Windows) / 쉘 파일 `script.sh` (Linux)
-
-가급적이면 디렉토리 경로 상에 한글이 섞이지 않은 편이 좋다.
-
-### 2-1. 윈도우 환경 버전 체크
-
-윈도우 환경일 경우 우선 Blender의 버전을 확인한다. 버전은 `C:\Program Files\Blender Foundation` 경로에 존재하는 폴더의 이름을 통해 확인할 수 있다. `script.bat` 파일에 작성된 Blender 버전은 3.3으로 설정되어 있으므로 만약 다르다면 이를 변경해주어야 한다.
-
-script.bat 파일을 메모장으로 열고 다음과 같은 라인을 찾는다.
-
-```
-"C:/Program Files/Blender Foundation/Blender 3.3/blender.exe" -b -P %1
-```
-
-여기서 Blender 버전에 따라 `Blender 3.3` 부분을 바꾸고 다시 저장한다.
-
-### 2-2. 터미널 실행
-
-준비가 끝났으면 파일들이 있는 디렉토리 경로에 터미널 창을 연다. 윈도우에선 폴더의 주소창에 cmd를 입력하여 바로 띄울 수 있다.
-
-해당 터미널 창에 다음의 명령어를 입력한다.
-
-```
-script.bat BlednerCLI.py
-```
-
-그러면 스크립트가 실행되며 .ply 파일의 변환이 시작된다.
-
-해당 폴더에 순차적으로 매핑된 텍스쳐 파일 `scene.png` 와 변환된 모델 `scene.glb` 파일이 생성되며 이를 원본 모델의 이름으로 zip 으로 압축되어 저장한다. 모든 모델에 대한 처리가 끝나면 터미널 창에서 `Blender quit` 이라는 메시지와 함께 종료된다.
-
-****
-
-## 3. 스크립트 설명
-
-### 3-1. script.bat / script.sh 
-
-먼저 script.bat 파일의 내용을 살펴보면 다음과 같다.
-
-```
-ECHO OFF
-
-IF "%1"=="" GOTO USAGE
-
-"C:/Program Files/Blender Foundation/Blender 3.3/blender.exe" -b -P %1
-GOTO END
-
-:USAGE
-ECHO script.bat [filename]
-
-:END
-```
-
-`ECHO OFF` 명령어는 실행한 명령에 대한 결과만을 보여줌으로써 터미널 화면을 간결하게 만들기 위한 명령어다.
-
-`IF "%1"=="" GOTO USAGE` 는 만약 터미널에서 배치 파일을 실행할 때 인자 없이 그냥 `script.bat` 만 실행했을 경우 정확한 사용법을 알려주는 명령어다. 배치 파일을 실행할 때에는 항상 인자로 파이썬 스크립트 파일을 추가해 주어야 한다.
-
-`"C:/Program Files/Blender Foundation/Blender 3.3/blender.exe" -b -P %1` 는 해당 경로의 `blender.exe` 파일을 통해 터미널 상에서 블렌더의 파이썬 스크립트를 실행할 수 있도록 해주는 명령어이다. `%1` 부분에선 배치 파일과 함께 입력했던 첫 번째 인자인 .py 파일이 들어간다.
-
-Linux에서 사용되는 script.sh 파일의 내용은 비교적 간단하다.
-
-```
-#!/bin/bash
-if [ "$#" = 1 ]
-then
-	blender -b -P "$1"
-else
-	echo 2gltf2.sh [SCRIPT.py]
-fi
-```
-
-터미널 상에서 쉘 파일과 함께 입력받는 인자가 1개일 경우 `blender -b -P [SCRIPT.py]` 로 해당 파이썬 스크립트를 실행한다. 그렇지 않을 경우 파일의 정확한 사용법을 알려준다.
-
-Linux 환경에서는 경로에 상관없이 터미널 상에서 바로 Blender 프로그램을 실행할 수 있다.
-
-### 3-2. BlenderCLI.py
-
-`BlenderCLI.py` 는 Blender로 .ply 파일의 텍스쳐를 추출하여 .glb 파일로 내보내는 과정을 자동화한 스크립트이다.
+RemeshScript.py 는 모델의 크기와 용량을 축소하고, 썸네일 이미지와 함께 압축 파일로 내보내는 스크립트이다.
 
 ```
 import os
-import bpy
 import zipfile
+```
 
-from os.path import basename
+먼저 `os` 모듈과 `zipfile` 모듈을 추가한다. os 모듈은 파일 입출력 경로를 참조하기 위해 필요하고, zipfile 모듈은 압축 파일을 생성하기 위해 필요하다. 만약 해당 모듈이 파이썬에 설치되어 있지 않다면 명령 프롬프트 창을 열고 `pip install os (또는 zipfile)` 을 입력하여 해당 패키지를 설치하면 된다.
 
-file_loc_export = os.getcwd() + '//'
-file_loc_import = os.getcwd() + '//'
+```
+file_loc_export = 'C:\\Users\\82109\\Downloads\\RemeshedObj\\'
+file_loc_import = 'C:\\Users\\82109\\Downloads\\BlenderUVs\\'
 fileEx = r'.ply'
 fileList = [file for file in os.listdir(file_loc_import) if file.endswith(fileEx)]
+```
 
+이후 파일을 입출력할 경로가 할당된 변수와, 작업을 처리할 모델의 확장자가 할당된 변수를 미리 선언한다. 그리고 임포트할 폴더 경로 내부에 존재하는, 해당 확장자를 가진 파일들을 불러와 `fileList` 변수에 할당해준다. 만약 불러올 모델의 경로나 확장자를 바꾸고 싶다면 이 변수들의 값만 수정해 준다면 쉽게 변경할 수 있다.
+
+```
 scene = bpy.context.scene
-
-#using bat
-bpy.ops.object.delete()
-
+scene.render.resolution_y = 1024
+scene.render.resolution_x = 1024
+scene.render.film_transparent = True
+scene.render.filepath = file_loc_export + 'thumbnail.png'
 ```
 
-처음엔 스크립트 작동에 필요한 모듈을 import하고 파일 변환 입출력 경로를 설정한다. 텍스쳐를 추출할 .ply 모델이 있는 곳은 `file_loc_import`에, .glb 파일로 내보낼 위치는 `file_loc_export`에 각각 할당한다. 지금은 현재 파일 경로로 설정되어 있으나 사용자가 임의로 수정할 수 있다.
+그 다음 썸네일 이미지를 추출하기 위해 `scene` 변수에 `bpy.context.scene` 을 캐싱해준다. `scene`의 멤버들로 하여금 추출된 이미지의 크기나 이름, 확장자 등을 자유롭게 변경할 수 있다.
 
-모델들을 import할 경로에서 .ply 파일만 찾아 `fileList`로 만든다. 그리고 Blender 프로그램을 처음 시작하면 기본적으로 Cube 오브젝트를 만들어두는데, 이를 삭제하기 위해 `bpy.ops.object.delete` 함수를 실행한다.
+`film_transparent`은 렌더된 이미지를 추출할 때 배경을 투명하게 할 지를 결정하는 속성이다. 이 경우 투명도 값이 손실되지 않기 위해 이미지 파일의 확장자를 .png로 설정해야 한다.
 
 ```
-
 for model in fileList:
     imported_object = bpy.ops.import_mesh.ply(filepath=file_loc_import+model)
 
-    image_name = bpy.context.active_object.name + '_tex'
-    img = bpy.data.images.new(image_name,2048,2048)
+    bpy.context.object.scale[0] = 0.010
+    bpy.context.object.scale[1] = 0.010
+    bpy.context.object.scale[2] = 0.010
+    bpy.context.object.rotation_euler[0] = 1.5708
+```
 
+for문을 사용해 `fileList` 에 존재하는 모델 파일들을 각각 작업한다. 먼저 `bpy.ops.import_mesh.ply(filepath)` 함수로 모델을 불러와 임시적으로 캐싱한다.
+
+모델의 크기를 원하는 수치만큼 조정한다. `scale` 배열의 각 원소들은 모델의 x, y, z축 스케일 값이다. 각각 0.01로 설정하면 모델의 크기가 그만큼 축소되게 된다.
+
+그리고 `rotation_euler`의 원소값을 수정하여 누워있는 모델을 회전시킨다. [0]번째 원소는 x축이고, 1.5708 이라는 수치는 오일러 변환된 각도값으로 90도 만큼 반시계 방향으로 회전한다는 것을 의미한다.
+
+```
+    mod = bpy.context.object.modifiers.new(name='decimate', type='DECIMATE')
+    mod.ratio = 0.1
+    bpy.ops.object.modifier_apply(modifier='decimate')
+```
+
+폴리곤 수를 압축하기 위해 decimate 모디파이어를 모델에 추가해준다. mod 변수에 캐싱한 다음 ratio 멤버를 0.1로 조정해주면 텍스쳐가 좀 뭉개지는 대신 모델의 폴리곤 수가 10분의 1로 줄어든다. `modifier_apply` 함수를 실행하지 않으면 변경 사항이 적용되지 않으니 주의한다.
+
+```
     mat = bpy.data.materials.get("Material")
-    
+  
     if len(bpy.context.active_object.data.materials) == 0:
-        bpy.context.active_object.data.materials.append(bpy.data.materials['Material'])
+          bpy.context.active_object.data.materials.append(bpy.data.materials['Material'])
     else:
         bpy.context.active_object.data.materials[0] = bpy.data.materials['Material']
 
-```
-
-`fileList` 의 각 .ply 모델들을 불러와 차례대로 처리를 시작한다. 먼저 텍스쳐를 추출할 이미지 `img`를 생성하고 모델에 할당할 매테리얼 정보를 `mat` 에 지정한다. 만약 매테리얼 정보가 없다면 새로 생성한다.
-
-```
-
     if mat:
         mat.node_tree.nodes.new("ShaderNodeVertexColor")
-        base_node = mat.node_tree.nodes[1]
         mat.node_tree.links.new(mat.node_tree.nodes[2].outputs['Color'], mat.node_tree.nodes[1].inputs['Base Color'])
-
-        mat.use_nodes = True
-        texture_node =mat.node_tree.nodes.new('ShaderNodeTexImage')
-        texture_node.name = 'Bake_node'
-        texture_node.select = True
-        mat.node_tree.nodes.active = texture_node
-        texture_node.image = img #Assign the image to the node
 ```
 
-매테리얼에서 모델의 표면 색상을 반영하는 정점 색상 노드를 생성하고, 렌더러에 반영되는 베이스 노드에 연결한다. 그 후 모델의 텍스쳐를 Bake하기 위해 이미지 노드를 생성해 준 다음 선택하여 활성화시킨다. 또한 위에서 생성했던 이미지 `img`를 노드에 할당해 준다.
+다음은 모델의 정점 색상을 출력하기 위해 매테리얼을 추가하는 과정이다. 이 과정이 없으면 추출된 모델이 아무런 색 없이 하얗게만 보이게 된다.
+
+매테리얼 데이터를 가져와 mat 변수에 할당하고, 만약 모델에 매테리얼 정보가 없다면 새로 생성한다. 이후 쉐이더의 노드 트리에 Vertex Color라는 노드를 새로 생성한 뒤 모델의 Base Color에 연결시킨다. 이러면 모델의 정점 색상이 기본적으로 할당되어 렌더링 후 추출할 때에도 제대로 보이게 된다.
 
 ```
-    bpy.ops.object.editmode_toggle()
-    bpy.ops.mesh.select_all(action='SELECT')
-    bpy.ops.uv.smart_project(angle_limit=1.55334)
-    bpy.ops.object.editmode_toggle()
-
-    bpy.context.scene.render.engine = 'CYCLES'
-    bpy.context.scene.cycles.bake_type = 'DIFFUSE'
-    bpy.context.scene.render.bake.use_pass_direct = False
-    bpy.context.scene.render.bake.use_pass_indirect = False
-    bpy.context.scene.render.bake.margin = 0
-
-    bpy.context.view_layer.objects.active = bpy.context.active_object
-    bpy.ops.object.bake(type='DIFFUSE', save_mode='EXTERNAL')
-
-    img.save_render(file_loc_export+'scene.png')
-```
-
-UV 매핑을 위해 불러온 모델의 모든 정점을 선택해 준 다음 `bpy.ops.uv.smart_project` 함수를 시행한다. `angle_limit` 인자는 매핑 시 최대 각도를 설정하며 최대값은 89도 = 1.55334 이다.
-
-이후 Blender의 렌더링 엔진을 Cycles로 변경한 다음 Bake 타입을 Diffuse(확산), 직접광과 간접광 반영 여부를 각각 False로 설정해준다. 이후 오브젝트를 Bake하고 이미지를 저장하면 출력 경로에 모델이 매핑된 `scene.png` 파일이 생성된다.
-
-```
-    if mat:
-        mat.node_tree.links.new(texture_node.outputs['Color'], base_node.inputs['Base Color'])
-
     zip_file = zipfile.ZipFile(file_loc_export+os.path.splitext(model)[0]+'.zip', "w")
-    zip_file.write(file_loc_export + 'scene.png', basename(file_loc_export + 'scene.png'), compress_type=zipfile.ZIP_DEFLATED)
+    bpy.ops.render.render(write_still = 1)
+    zip_file.write(scene.render.filepath, basename(scene.render.filepath), compress_type=zipfile.ZIP_DEFLATED)
+```
 
-    bpy.ops.export_scene.gltf(filepath=file_loc_export+'scene.glb', export_materials='EXPORT', export_format='GLB')
-    zip_file.write(file_loc_export + 'scene.glb', basename(file_loc_export + 'scene.glb'), compress_type=zipfile.ZIP_DEFLATED)
+이렇게 만들어진 모델을 압축 파일로 만들기 위해 `zip_file` 변수를 선언한다. 파일 경로는 추출할 경로로 설정하고, 현재 작업 중인 모델 파일 이름에 .zip 확장자를 붙인 뒤 읽기 전용으로 만든다.
 
-    for mat in bpy.context.active_object.data.materials:
-        for n in mat.node_tree.nodes:
-            if n.name == 'Bake_node':
-                mat.node_tree.nodes.remove(n)
+`bpy.ops.render.render` 함수를 실행하면 렌더링 작업이 시작되고, write_still 파라미터를 True로 설정하면 지정해둔 경로에 방금 설정했던 썸네일 png 파일이 생성된다. 이후 만든 이미지를 .zip 파일 안에 들어가게끔 압축시킨다.
 
+```
+from os.path import basename
+```
+
+이 때 `basename` 파라미터를 삽입해야 압축 파일 내부에 경로 폴더가 생성되지 않고 파일만 압축된다. 이를 위해 코드 상단에 미리 `basename`을 임포트해둔다.
+
+```
+    bpy.ops.export_scene.gltf(filepath=file_loc_export+'scene.gltf', export_materials='EXPORT', export_format='GLTF_EMBEDDED')
     bpy.ops.object.delete()
+    zip_file.write(file_loc_export + 'scene.gltf', basename(file_loc_export + 'scene.gltf'), compress_type=zipfile.ZIP_DEFLATED)
     zip_file.close()
 ```
 
-그 다음 생성한 텍스쳐 파일을 모델에 반영하기 위해 베이스 노드와 이미지 노드를 연결하고, Zip 파일을 생성해 기존에 만든 `scene.png` 파일과 출력한 모델 파일 `scene.glb`를 함께 압축시킨다. 마지막으로 매테리얼의 텍스쳐 노드와 오브젝트를 지우면 모델 하나에 대한 작업이 종료된다. 이 과정을 모든 모델에 반복한다.
+이제 `export_scene.gltf` 메소드를 통해 gltf 형식으로 모델 파일을 추출한다. 함수를 변경하면 .obj나 .ply 등의 다른 확장자로도 추출할 수 있으며, export_format 파라미터의 값을 변경하면 .glb 확장자로도 추출이 가능하다.
+
+반복문의 다음 작업에 방해되지 않기 위해 `delete` 함수로 작업한 모델을 삭제한다. 그리고 추출한 모델 파일을 아까 전의 .zip 파일에 같이 압축시키면 일련의 작업이 완료된다. 
+
+
+***
+
+## 2. AutoUnitSize.py
+
+AutoUnitSize.py 는 1x1x1 박스 안에 들어가게끔 모델 크기를 자동 가공하는 기능을 추가한 스크립트이다. 전체적인 작업 플로우는 기존의 RemeshScript.py 를 기반으로 하나, 일부 코드를 수정하였다.
+
+```
+    dimX = bpy.context.object.dimensions.x
+    dimY = bpy.context.object.dimensions.y
+    dimZ = bpy.context.object.dimensions.z
+
+    dimMax = dimX if dimX > dimY else dimY
+    dimMax = dimZ if dimZ > dimMax else dimMax
+
+    bpy.context.object.scale[0] = 1 / dimMax
+    bpy.context.object.scale[1] = 1 / dimMax
+    bpy.context.object.scale[2] = 1 / dimMax
+    bpy.context.object.rotation_euler[0] = 1.5708
+    
+    bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='MEDIAN')
+    bpy.context.object.location[0] = 0
+    bpy.context.object.location[1] = 0
+    bpy.context.object.location[2] = 0
+```
+
+ 해당 코드는 불러온 모델의 크기를 자동으로 가공하는 부분이다. `bpy.context.object.dimension`을 통해 모델을 둘러싼 Bounding Box의 xyz 값을 추출하고, 개중 가장 큰 값인 `dimMax` 값으로 모델의 스케일을 같은 비율로 나눈다. 각 스케일 값에 동일하게 `1 / dimMax` 를 곱했기 때문에 모델은 기존 비율을 유지하면서 썸네일 렌더링의 기준이 되는 1x1x1 박스 안에 들어갈 수 있을 정도로 축소된다.
+
+ 또한 `bpy.ops.object.origin_set` 함수를 사용하여 모델의 피벗 기준점을 볼륨 가중치에 따라 중앙으로 변경한 뒤, 위치를 다시 원점으로 보정한다. 이러면 모델과 기준점의 위치가 매칭되지 않는 문제를 방지할 수 있다.
+
+***
+
+## 3. RespectRemesh.py
+
+RespectRemesh.py 는 모델 주변 8방향으로 썸네일을 렌더링해 압축하는 스크립트이다. 역시 하단 부분을 제외하곤 기존의 스크립트와 유사하다.
+
+```
+    zip_file = zipfile.ZipFile(file_loc_export+os.path.splitext(model)[0]+'.zip', "w")
+
+    for i in range(0, 8):
+        scene.render.filepath = file_loc_export + 'thumbnail'+str(i)+'.png'
+        bpy.data.objects['Empty'].rotation_euler[2] = math.radians(i*45)
+        bpy.ops.render.render(write_still = 1) 
+
+        impath = scene.render.filepath
+        im = Image.open(impath)
+        nim = Image.new(mode = "RGBA", size = im.size, color = (221, 221, 221))
+        nim.paste(im, (0, 0), im)
+        nim.save(impath)
+        zip_file.write(impath, basename(impath), compress_type=zipfile.ZIP_DEFLATED)
+```
+
+해당 코드는 원점의 모델을 중심으로 카메라를 45도 각도로 회전시켜 총 8장의 썸네일을 렌더링해 출력하는 부분이다. 번호가 매겨진 thumnail png 파일을 생성한 뒤, 서로 다른 카메라 각도로 렌더링한 모델을 각 png파일에 그려서 임의로 생성한 zip 파일에 압축시켜 넣는 작업을 수행한다. 
+
+***
+
+## 4. RemeshWhite.py
+
+RemeshWhite.py 는 기존의 RemeshScript.py 에서 모델의 밝기를 단계적으로 조절하는 기능을 추가한 스크립트이다.
+
+```
+    for i in range(1, 11):
+        bpy.data.worlds["World"].node_tree.nodes["Background"].inputs[1].default_value = i
+        bpy.ops.render.render(write_still = 1)
+        zip_file = zipfile.ZipFile(file_loc_export+os.path.splitext(model)[0]+str(i).zfill(2)+'.zip', "w")
+        zip_file.write(scene.render.filepath, basename(scene.render.filepath), compress_type=zipfile.ZIP_DEFLATED)
+        zip_file.write(file_loc_export + 'scene.glb', basename(file_loc_export + 'scene.glb'), compress_type=zipfile.ZIP_DEFLATED)
+        zip_file.close()
+```
+
+for문의 첫 번째 줄은 blender 프로그램 상 World의 백그라운드 노드를 가져와서 그중 두 번째 인자인 Ambient 밝기를 단계에 따라 조절하는 기능이다.
+
+해당 함수로 렌더링 시 모델의 전체적 밝기를 조절하고, 이후 기존의 방식대로 렌더링해 썸네일 png 파일을 생성한 뒤 압축 파일에 glb와 이미지 파일을 각각 저장한다.
