@@ -20,7 +20,6 @@ size_model = []
 name_model = []
 
 file_list = os.listdir(file_loc_zip)
-#print(file_list)
 
 for model in file_list:
     name_model.append(os.path.splitext(model)[0].split('_', 1)[1])

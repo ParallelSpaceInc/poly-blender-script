@@ -14,7 +14,6 @@ ws = wb.active
 align = Alignment(horizontal='center', vertical='center')
 
 path_origin = "C:/Users/USER/Downloads/Remesh/Old/Origins/"
-path_s500_r10_glb = "C:/Users/USER/Downloads/Remesh/models_glb_s500_r10_0919/"
 
 sizeX = []
 sizeY = []
@@ -26,9 +25,7 @@ ws.column_dimensions['C'].width = 10
 ws.column_dimensions['D'].width = 10
 ws.column_dimensions['E'].width = 10
 
-file_list = os.listdir(path_s500_r10_glb)
-
-txt = open("C:/Users/USER/Downloads/Remesh/Excel/txt.txt", "w")
+file_list = os.listdir(path_origin)
 
 for model in file_list:
     modelpath = path_origin+os.path.splitext(model)[0]+'.ply'
@@ -37,10 +34,8 @@ for model in file_list:
         sizeX.append(bpy.context.object.dimensions.x)
         sizeY.append(bpy.context.object.dimensions.y)
         sizeZ.append(bpy.context.object.dimensions.z)
-        txt.write(str(bpy.context.object.dimensions.x) + " " + str(bpy.context.object.dimensions.y) + " " + str(bpy.context.object.dimensions.z) + "\n")
         bpy.ops.object.delete()
-        
-txt.close()
+
 for x in range(2, (len(file_list)+1)):
     ws.cell(x, 2, os.path.splitext(file_list[x-2])[0])
     ws.cell(x, 3, sizeX[x-2])

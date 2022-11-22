@@ -30,7 +30,6 @@ ws.column_dimensions['E'].width = 18
 ws.column_dimensions['F'].width = 18
 
 file_list = os.listdir(path_s500_r10_glb)
-#print(file_list)
 
 for model in file_list:
     modelpath = path_origin+os.path.splitext(model)[0]+'.ply'
@@ -55,11 +54,6 @@ for model in file_list:
         ziptmp = zipfile.ZipFile(modelpath)
         sizekb = ziptmp.getinfo(ziptmp.namelist()[1]).file_size // 1024
         size_s500_r10_glb.append(sizekb)
-
-#print(len(size_origin))
-#print(len(size_s100_r10_gltf))
-#print(len(size_s100_r10_glb))
-#print(len(size_s500_r10_glb))
 
 for x in range(2, (len(file_list)+1)):
     ws.cell(x, 2, os.path.splitext(file_list[x-2])[0])
